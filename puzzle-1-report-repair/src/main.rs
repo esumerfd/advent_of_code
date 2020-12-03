@@ -6,7 +6,7 @@ use std::io::BufRead;
 fn main() {
     println!("Repair Report");
 
-    let filename = String::from("../expense.report");
+    let filename = String::from("expense.report");
 
      let star_multiple = report_lines(filename)
         .and_then(|lines| Ok(process(lines)))
