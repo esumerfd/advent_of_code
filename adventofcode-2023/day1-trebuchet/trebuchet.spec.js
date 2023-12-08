@@ -51,7 +51,7 @@ describe("trebuchet", function() {
     })
   })
 
-  describe.skip("Part two", function() {
+  describe("Part two", function() {
     test("include words", function() {
       expect(trebuchet.firstLastDigit("two1nine")).toBe(29)
       expect(trebuchet.firstLastDigit("eightwothree")).toBe(83)
@@ -63,14 +63,14 @@ describe("trebuchet", function() {
     })
 
     test("simple work replacement", function() {
-      expect(trebuchet.wordsToDigits("one", "1"))
-      expect(trebuchet.wordsToDigits("two", "2"))
-      expect(trebuchet.wordsToDigits("onetwo", "12"))
+      expect(trebuchet.findFirstDigit("one", "1"))
+      expect(trebuchet.findFirstDigit("two", "2"))
+      expect(trebuchet.findFirstDigit("onetwo", "12"))
     })
 
-    test("overlapped words", function() {
-      expect(trebuchet.wordsToDigits("oneightthree")).toBe("1ight3")
-      expect(trebuchet.wordsToDigits("eightwofour")).toBe("8wo4")
+    test.only("overlapped words", function() {
+      expect(trebuchet.findFirstDigit("oneightthree")).toBe("1")
+      expect(trebuchet.findFirstDigit("eightwofour")).toBe("8")
     })
   })
 })

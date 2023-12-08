@@ -28,26 +28,49 @@ function calibrationLines(data, lineCallback) {
 
 function firstLastDigit(calibrationLine) {
   if (!calibrationLine) return 0
-  let digits = wordsToDigits(calibrationLine)
-  digits = digits.replace(/[^\d]+/g, "")
-  if (digits) digits = digits[0] + digits.slice(-1)
-  return Number(digits)
+  let firstDigit = findFirstDigit(calibrationLine)
+  let lastDigit = findFirstDigit(reverse(calibrationLine))
+  return Number(`${firstDigit}${lastDigit}`)
 }
 
 var words = {
-  "one":    "1",
-  "two":    "2",
-  "three":  "3",
-  "four":   "4",
-  "five":   "5",
-  "six":    "6",
-  "seven":  "7",
-  "eight":  "8",
-  "nine":   "9",
+  "1":    "1",
+  "2":    "2",
+  "3":    "3",
+  "4":    "4",
+  "5":    "5",
+  "6":    "6",
+  "7":    "7",
+  "8":    "8",
+  "9":    "9",
+  "one":  "1",
+  "two":  "2",
+  "three":"3",
+  "four": "4",
+  "five": "5",
+  "six":  "6",
+  "seven":"7",
+  "eight":"8",
+  "nine": "9",
 }
 
-function wordsToDigits(calibrationLine) {
-  return calibrationLine
+function findFirstDigit(calibrationLine) {
+  let newDigit = ""
+
+  let letters = calibrationLine.split("")
+
+  wordselect:
+  for (let word in words) {
+    for (let index = 0; index < letters.length; index++) {
+      let partLetters = letters.slice(index).join("")
+      if (partLetters.startsWith(word)) {
+        newDigit = words[word]
+        break wordselect
+      }
+    }
+  }
+
+  return newDigit
 }
 
 function reverseString(text) {
@@ -56,4 +79,4 @@ function reverseString(text) {
   return reversed.join("")
 }
 
-module.exports = { calculateFile, calculate, calibrationLines, firstLastDigit, wordsToDigits }
+module.exports = { calculateFile, calculate, calibrationLines, firstLastDigit, findFirstDigit }
