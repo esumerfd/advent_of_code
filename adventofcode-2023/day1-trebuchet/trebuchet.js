@@ -28,9 +28,32 @@ function calibrationLines(data, lineCallback) {
 
 function firstLastDigit(calibrationLine) {
   if (!calibrationLine) return 0
-  var digits = calibrationLine.replace(/[^\d]+/g, "")
+  let digits = wordsToDigits(calibrationLine)
+  digits = digits.replace(/[^\d]+/g, "")
   if (digits) digits = digits[0] + digits.slice(-1)
   return Number(digits)
 }
 
-module.exports = { calculateFile, calculate, calibrationLines, firstLastDigit  }
+var words = {
+  "one":    "1",
+  "two":    "2",
+  "three":  "3",
+  "four":   "4",
+  "five":   "5",
+  "six":    "6",
+  "seven":  "7",
+  "eight":  "8",
+  "nine":   "9",
+}
+
+function wordsToDigits(calibrationLine) {
+  return calibrationLine
+}
+
+function reverseString(text) {
+  let letters = text.split("")
+  let reversed = letters.reverse()
+  return reversed.join("")
+}
+
+module.exports = { calculateFile, calculate, calibrationLines, firstLastDigit, wordsToDigits }

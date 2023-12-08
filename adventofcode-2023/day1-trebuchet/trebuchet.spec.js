@@ -6,7 +6,8 @@ describe("trebuchet", function() {
     test("adds up numbers", function() {
       let sum = trebuchet.calculateFile('puzzle_input')
 
-      expect(sum).toBe(54304)
+      // Part One  expect(sum).toBe(54304)
+      // expect(sum).toBe(000)
     })
 
     test.each`
@@ -47,6 +48,29 @@ describe("trebuchet", function() {
       trebuchet.calibrationLines(data, function (line) { count++ })
 
       expect(count).toBe(3)
+    })
+  })
+
+  describe.skip("Part two", function() {
+    test("include words", function() {
+      expect(trebuchet.firstLastDigit("two1nine")).toBe(29)
+      expect(trebuchet.firstLastDigit("eightwothree")).toBe(83)
+      expect(trebuchet.firstLastDigit("abcone2threexyz")).toBe(13)
+      expect(trebuchet.firstLastDigit("xtwone3four")).toBe(24)
+      expect(trebuchet.firstLastDigit("4nineeightseven2")).toBe(42)
+      expect(trebuchet.firstLastDigit("zoneight234")).toBe(14)
+      expect(trebuchet.firstLastDigit("7pqrstsixteen")).toBe(76)
+    })
+
+    test("simple work replacement", function() {
+      expect(trebuchet.wordsToDigits("one", "1"))
+      expect(trebuchet.wordsToDigits("two", "2"))
+      expect(trebuchet.wordsToDigits("onetwo", "12"))
+    })
+
+    test("overlapped words", function() {
+      expect(trebuchet.wordsToDigits("oneightthree")).toBe("1ight3")
+      expect(trebuchet.wordsToDigits("eightwofour")).toBe("8wo4")
     })
   })
 })
