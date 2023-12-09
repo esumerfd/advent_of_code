@@ -13,7 +13,7 @@ fn start_puzzle(puzzle_filename: &str) {
 }
 
 fn bag_draws(line: &str) {
-    println!("{}", line);
+    // println!("{}", line);
 }
 
 fn games(puzzle_filename: &str, bag_draws: Callback) {
@@ -25,6 +25,16 @@ fn games(puzzle_filename: &str, bag_draws: Callback) {
         }
     }
 
+}
+
+struct BagDraw {
+    blue: u32,
+    green: u32,
+    red: u32,
+}
+
+fn parse_game(game: &str) -> Vec<BagDraw> {
+    vec![BagDraw{ blue: 1, green: 3, red: 2 }]
 }
 
 // The output is wrapped in a Result to allow matching on errors
@@ -48,5 +58,16 @@ mod tests {
     #[test]
     fn should_read_file_lines() {
         start_puzzle("./puzzle_input")
+    }
+
+    #[test]
+    fn should_parse_bad_draw() {
+        let bag_draw: Vec<BagDraw> = parse_game("Game 79: 3 green, 1 blue, 2 red; 8 green, 1 blue, 2 red; 2 blue, 1 red, 11 green");
+
+        println!("bad draw: blue {}, green {}, red {}", bag_draw[0].blue, bag_draw[0].green, bag_draw[0].red);
+
+        assert_eq!(1, bag_draw[0].blue);
+        assert_eq!(3, bag_draw[0].green);
+        assert_eq!(2, bag_draw[0].red);
     }
 }
