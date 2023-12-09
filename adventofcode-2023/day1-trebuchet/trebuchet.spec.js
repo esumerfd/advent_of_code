@@ -6,8 +6,10 @@ describe("trebuchet", function() {
     test("adds up numbers", function() {
       let sum = trebuchet.calculateFile('puzzle_input')
 
-      // Part One  expect(sum).toBe(54304)
-      // expect(sum).toBe(000)
+      // Part One:
+      // expect(sum).toBe(54304)
+      // Part Two:
+      expect(sum).toBe(54418)
     })
 
     test.each`
@@ -15,6 +17,7 @@ describe("trebuchet", function() {
       ${12}       | ${"12"}
       ${99}       | ${"aaaaa987cccccc789ddddd"}
       ${11+22+33} | ${"a1a1a\nb2b2b\nc3c3c\n"}
+      ${11+22+33} | ${"aonea1a\nbtwobtwob\ncthreecthreec\n"}
     `("expecting $expected from calibrationLine $calibrationLine", ({expected, calibrationLine}) => {
 
       let sum = trebuchet.calculate(calibrationLine)
@@ -68,9 +71,14 @@ describe("trebuchet", function() {
       expect(trebuchet.findFirstDigit("onetwo", "12"))
     })
 
-    test.only("overlapped words", function() {
+    test("overlapped words", function() {
       expect(trebuchet.findFirstDigit("oneightthree")).toBe("1")
       expect(trebuchet.findFirstDigit("eightwofour")).toBe("8")
+    })
+
+    test("overlapped words last digit", function() {
+      expect(trebuchet.findLastDigit("oneighthree")).toBe("3")
+      expect(trebuchet.findLastDigit("eightwone")).toBe("1")
     })
   })
 })
