@@ -1,4 +1,3 @@
-use std::io;
 use std::fs;
 use std::str::FromStr;
 use std::collections::HashMap;
@@ -13,6 +12,10 @@ impl FromStr for Game {
 
     fn from_str(game_text: &str) -> Result<Self, Self::Err> {
 
+        if game_text.len() == 0 {
+            return Ok(Game{number: 0, bag_draws: Vec::new()});
+        }
+
         let (number, remainder) = parse_number(game_text);
         let bag_draws = parse_bag_draws(remainder);
 
@@ -21,25 +24,32 @@ impl FromStr for Game {
 }
 
 fn main() {
-    start_puzzle("./puzzle_input")
+    let _ = start_puzzle("./puzzle_input");
 }
 
-fn start_puzzle(puzzle_filename: &str) {
+fn start_puzzle(puzzle_filename: &str) -> Vec<Game> {
     // Parse games, bag_draws
-    let _ = parse(puzzle_filename);
+    let games = parse(puzzle_filename);
     // Filter by max of each color
     // sum game numbers of whats left
 
+    return games;
 }
 
-fn parse(puzzle_filename: &str) -> io::Result<Game> {
+fn parse(puzzle_filename: &str) -> Vec<Game> {
     let contents = fs::read_to_string(puzzle_filename);
-    parse_games(&contents.unwrap());
-    return Ok(Game { number: 0, bag_draws: Vec::new()});
+    return parse_games(&contents.unwrap());
 }
 
-fn parse_games(_games: &str) -> Vec<Game> {
-    return vec!(Game { number: 79, bag_draws: vec![HashMap::from([(String::from("red"), 1), (String::from("blue"), 2), (String::from("green"), 3)])] });
+fn parse_games(contents: &str) -> Vec<Game> {
+    let mut games: Vec<Game> = Vec::new();
+
+    for line in contents.lines() {
+        let game = parse_game(line);
+        games.push(game);
+    }
+
+    return games;
 }
 
 fn parse_game(game: &str) -> Game {
@@ -83,7 +93,9 @@ mod tests {
 
     #[test]
     fn should_read_file_lines() {
-        start_puzzle("./puzzle_input")
+        let games = start_puzzle("./puzzle_input");
+
+        assert_eq!(101, games.len());
     }
 
     #[test]
