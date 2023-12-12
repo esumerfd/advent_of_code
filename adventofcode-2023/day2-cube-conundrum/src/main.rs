@@ -2,9 +2,20 @@ use std::fs;
 use std::str::FromStr;
 use std::collections::HashMap;
 
+type Bag = HashMap<String, u32>;
+
 struct Game {
     number: u32,
-    bag_draws: Vec<HashMap<String, u32>>,
+    bag_draws: Vec<Bag>,
+}
+
+impl Clone for Game {
+    fn clone(&self) -> Self {
+        return Game {
+            number: self.number,
+            bag_draws: self.bag_draws.clone(),
+        };
+    }
 }
 
 impl FromStr for Game {
@@ -23,17 +34,26 @@ impl FromStr for Game {
     }
 }
 
-fn main() {
-    let _ = start_puzzle("./puzzle_input");
+impl Game {
+    fn sum(games: Vec<Game>) -> u32 {
+        return games.iter().map(|game| game.number).sum();
+    }
 }
 
-fn start_puzzle(puzzle_filename: &str) -> Vec<Game> {
+fn main() {
+    let bag = parse_bag("blue: 14, green: 13, red: 12");
+    let _ = start_puzzle("./puzzle_input", bag);
+}
+
+fn start_puzzle(puzzle_filename: &str, bag: Bag) -> u32 {
     // Parse games, bag_draws
     let games = parse(puzzle_filename);
+
     // Filter by max of each color
+    let filtered_games = filter(games, bag);
     // sum game numbers of whats left
 
-    return games;
+    return Game::sum(filtered_games);
 }
 
 fn parse(puzzle_filename: &str) -> Vec<Game> {
@@ -64,27 +84,64 @@ fn parse_number(game: &str) -> (u32, &str) {
     return (number, line_parts[1]);
 }
 
-fn parse_bag_draws(bag_draws: &str) -> Vec<HashMap<String, u32>> {
-    let mut results: Vec<HashMap<String, u32>> = Vec::new();
+fn parse_bag_draws(bag_draws: &str) -> Vec<Bag> {
+    let mut results: Vec<Bag> = Vec::new();
 
     let bag_draw = bag_draws.split(";");
     for cubes in bag_draw {
 
-        let mut cube: HashMap<String, u32> = HashMap::new();
-
-        let cube_colors = cubes.split(",").collect::<Vec<&str>>();
-        for cube_color in cube_colors {
-
-            let parts = cube_color.split(" ").collect::<Vec<&str>>();
-            let count = parts[1];
-            let color = parts[2];
-
-            cube.insert(String::from(color), count.parse::<u32>().unwrap());
-        }
+        let cube = parse_bag(cubes);
         results.push(cube);
     }
 
     return results;
+}
+
+fn parse_bag(cubes: &str) -> Bag {
+    let mut cube: Bag = Bag::new();
+
+    let cube_colors = cubes.split(",").collect::<Vec<&str>>();
+    for cube_color in cube_colors {
+
+        let parts = cube_color.split(" ").collect::<Vec<&str>>();
+        let count = parts[1];
+        let color = parts[2];
+
+        cube.insert(String::from(color), count.parse::<u32>().unwrap());
+    }
+
+    return cube;
+}
+
+fn filter(games: Vec<Game>, bag: Bag) -> Vec<Game> {
+    let mut filtered: Vec<Game> = Vec::new();
+
+    for game in games {
+
+        let large_draws = game.bag_draws
+            .clone()
+            .into_iter()
+            .filter(|draw| {
+                return cube_count(draw, "blue") > cube_count(&bag, "blue") 
+                || cube_count(draw, "green") > cube_count(&bag, "green") 
+                || cube_count(draw, "red") > cube_count(&bag, "red")
+            })
+            .count();
+
+        if large_draws == 0 {
+            filtered.push(game);
+        }
+    }
+
+    return filtered;
+}
+
+fn cube_count(bag: &Bag, color: &str) -> u32 {
+    let mut count: u32 = 0;
+    if bag.contains_key(color) {
+        count = bag[color];
+    }
+    return count;
 }
 
 #[cfg(test)]
@@ -92,8 +149,16 @@ mod tests {
     use super::*;
 
     #[test]
+    fn should_add_all_game_numbers_not_filtered() {
+        let bag = parse_bag(" 14 blue, 13 green, 12 red");
+        let sum = start_puzzle("./puzzle_input", bag);
+
+        assert_eq!(2476, sum);
+    }
+
+    #[test]
     fn should_read_file_lines() {
-        let games = start_puzzle("./puzzle_input");
+        let games = parse("./puzzle_input");
 
         assert_eq!(101, games.len());
     }
@@ -130,4 +195,52 @@ mod tests {
         assert_eq!(1, game.bag_draws[0].len());
         assert_eq!(3, game.bag_draws[0]["green"]);
     }
+
+    #[test]
+    fn should_filter_out_game_that_doesnt_match() {
+        let games: Vec<Game> = vec!(
+            parse_game("Game 5: 2 blue, 2 green, 3 red"),
+            parse_game("Game 9: 1 blue, 2 green, 3 red"),
+        );
+
+        let bag = parse_bag(" 1 blue, 2 green, 3 red");
+
+        let filtered_games = filter(games, bag);
+
+        assert_eq!(1, filtered_games.len());
+        assert_eq!(9, filtered_games[0].number);
+    }
+
+    #[test]
+    fn should_filter_out_draw_specified_second() {
+        let games: Vec<Game> = vec!(
+            parse_game("Game 5: 1 blue, 2 green, 3 red"),
+            parse_game("Game 9: 1 blue, 2 green, 3 red; 1 blue, 3 green, 3 red"),
+        );
+
+        let bag = parse_bag(" 1 blue, 2 green, 3 red");
+
+        let filtered_games = filter(games, bag);
+
+        assert_eq!(1, filtered_games.len());
+        assert_eq!(5, filtered_games[0].number);
+    }
+
+    #[test]
+    fn should_sum_all_game_numbers() {
+        let games: Vec<Game> = vec!(
+            parse_game("Game 79: 3 green, 1 blue, 2 red); 8 green, 1 blue, 2 red; 2 blue, 1 red, 11 green"),
+            parse_game("Game 88: 3 green, 1 blue, 2 red); 8 green, 1 blue, 2 red; 2 blue, 1 red, 11 green"),
+        );
+
+        assert_eq!(167, Game::sum(games));
+    }
+
+    #[test]
+    fn should_sum_all_games_when_there_are_none() {
+        let games: Vec<Game> = Vec::new();
+
+        assert_eq!(0, Game::sum(games));
+    }
+
 }
