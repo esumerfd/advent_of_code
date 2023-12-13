@@ -35,25 +35,60 @@ impl FromStr for Game {
 }
 
 impl Game {
-    fn sum(games: Vec<Game>) -> u32 {
+    fn sum(games: &mut Vec<Game>) -> u32 {
         return games.iter().map(|game| game.number).sum();
+    }
+
+    fn power_sum(games: &mut Vec<Game>) -> u32 {
+
+        let mut power_sums: u32 = 0;
+        let mut smallest_bag: Bag;
+        for game in games {
+            smallest_bag = Game::smallest_bag(game.clone());
+            power_sums += Game::color_multiple(smallest_bag);
+        }
+
+        return power_sums;
+    }
+
+    fn color_multiple(bag: Bag) -> u32 {
+        let mut multiple = 1;
+        for (_, count) in bag {
+            multiple *= count;
+        }
+        return multiple;
+    }
+
+    fn smallest_bag(game: Game) -> Bag {
+        let mut smallest_bag: Bag = parse_bag(" 0 blue, 0 green, 0 red");
+
+        for bag in game.bag_draws.clone() {
+            for (color, count) in bag.clone() {
+                if bag.contains_key(&color) && count > smallest_bag[&color] {
+                    smallest_bag.insert(color, count);
+                }
+            }
+        }
+
+        return smallest_bag;
     }
 }
 
 fn main() {
-    let bag = parse_bag("blue: 14, green: 13, red: 12");
-    let _ = start_puzzle("./puzzle_input", bag);
+    let bag = parse_bag(" blue: 14, green: 13, red: 12");
+    let (sum, power_sum) = start_puzzle("./puzzle_input", bag);
+    println!("Game sum: {}, power_sum: {}", sum, power_sum);
 }
 
-fn start_puzzle(puzzle_filename: &str, bag: Bag) -> u32 {
+fn start_puzzle(puzzle_filename: &str, bag: Bag) -> (u32, u32) {
     // Parse games, bag_draws
     let games = parse(puzzle_filename);
 
     // Filter by max of each color
-    let filtered_games = filter(games, bag);
+    let mut filtered_games = filter(games, bag);
     // sum game numbers of whats left
 
-    return Game::sum(filtered_games);
+    return ( Game::sum(&mut filtered_games), Game::power_sum(&mut filtered_games) )
 }
 
 fn parse(puzzle_filename: &str) -> Vec<Game> {
@@ -151,9 +186,10 @@ mod tests {
     #[test]
     fn should_add_all_game_numbers_not_filtered() {
         let bag = parse_bag(" 14 blue, 13 green, 12 red");
-        let sum = start_puzzle("./puzzle_input", bag);
+        let (sum, power_sum) = start_puzzle("./puzzle_input", bag);
 
         assert_eq!(2476, sum);
+        assert_eq!(17276, power_sum);
     }
 
     #[test]
@@ -228,19 +264,49 @@ mod tests {
 
     #[test]
     fn should_sum_all_game_numbers() {
-        let games: Vec<Game> = vec!(
+        let mut games: Vec<Game> = vec!(
             parse_game("Game 79: 3 green, 1 blue, 2 red); 8 green, 1 blue, 2 red; 2 blue, 1 red, 11 green"),
             parse_game("Game 88: 3 green, 1 blue, 2 red); 8 green, 1 blue, 2 red; 2 blue, 1 red, 11 green"),
         );
 
-        assert_eq!(167, Game::sum(games));
+        assert_eq!(167, Game::sum(&mut games));
     }
 
     #[test]
     fn should_sum_all_games_when_there_are_none() {
-        let games: Vec<Game> = Vec::new();
+        let mut games: Vec<Game> = Vec::new();
 
-        assert_eq!(0, Game::sum(games));
+        assert_eq!(0, Game::sum(&mut games));
     }
 
+    #[test]
+    fn should_find_least_bag_cubes_of_games() {
+        let mut games: Vec<Game> = vec!(
+            parse_game("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"),
+            parse_game("Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue"),
+            parse_game("Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red"),
+            parse_game("Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red"),
+            parse_game("Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green"),
+        );
+
+        assert_eq!(2286, Game::power_sum(&mut games));
+    }
+
+    #[test]
+    fn should_find_least_cubes_of_game() {
+        let game = parse_game("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green");
+
+        let bag = Game::smallest_bag(game);
+
+        assert_eq!(6, bag["blue"]);
+        assert_eq!(2, bag["green"]);
+        assert_eq!(4, bag["red"]);
+    }
+
+    #[test]
+    fn should_multiply_color_counts_together() {
+        let bag: Bag = parse_bag(" 2 blue, 3 green, 4 red");
+
+        assert_eq!(24, Game::color_multiple(bag));
+    }
 }
