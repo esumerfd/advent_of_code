@@ -82,13 +82,13 @@ fn main() {
 
 fn start_puzzle(puzzle_filename: &str, bag: Bag) -> (u32, u32) {
     // Parse games, bag_draws
-    let games = parse(puzzle_filename);
+    let mut games = parse(puzzle_filename);
 
     // Filter by max of each color
-    let mut filtered_games = filter(games, bag);
+    let mut filtered_games = filter(games.clone(), bag);
     // sum game numbers of whats left
 
-    return ( Game::sum(&mut filtered_games), Game::power_sum(&mut filtered_games) )
+    return ( Game::sum(&mut filtered_games), Game::power_sum(&mut games) )
 }
 
 fn parse(puzzle_filename: &str) -> Vec<Game> {
@@ -189,7 +189,7 @@ mod tests {
         let (sum, power_sum) = start_puzzle("./puzzle_input", bag);
 
         assert_eq!(2476, sum);
-        assert_eq!(17276, power_sum);
+        assert_eq!(54911, power_sum);
     }
 
     #[test]
