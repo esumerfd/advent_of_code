@@ -1,0 +1,22 @@
+; (list-ref (list 1 2 3) 1)
+
+(define split-line
+  (lambda (line)
+    (string->list line)
+    ))
+
+(define (load-puzzle filename callback)
+  (call-with-input-file filename
+    (lambda (p)
+      (let loop ((line (read-line p))
+                 (result '()))
+        (if (eof-object? line)
+          (reverse result)
+          (loop (read-line p) (cons (callback line) result))
+          )
+        ))))
+
+(define lines (load-puzzle "puzzle_input" split-line))
+
+(print "Hello World")
+#| (print lines) |#

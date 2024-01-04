@@ -1,0 +1,10 @@
+(use gauche.test) 
+
+(test-start "load file")
+(load "./gear-ratios.gauche")
+(import gear-ratios.gauche)
+
+(test-module 'gear-ratios.gauche)
+
+(test-section "load file y")
+(test "loads a file" EXPECT (load-puzzle "puzzle_input"))
