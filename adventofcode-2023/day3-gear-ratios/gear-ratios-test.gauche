@@ -1,0 +1,18 @@
+(use gauche.test)
+
+(test-start "load file")
+(load "./gear-ratios.gauche")
+
+(test-section "load file y")
+; (test "loads a file"
+;   (list "467..114..")
+;   (substring (list-ref (load-puzzle "puzzle_input.test" (lambda (line) line )) 0) 0 10))
+
+(test-section "list of lists")
+(test "reads file"
+  11
+  (lambda () (length lines)))
+
+(test-section "value-at")
+(test "index 0 0" #\4 (lambda () (value-at lines 0 0)))
+
